@@ -272,8 +272,9 @@ export default function Home() {
   const [bestTimes, setBestTimes] = useState<Record<number, number>>({});
   const lastLitCount = useRef(1);
   const level = LEVELS[levelIndex];
-  const threeStarLimit = game.optimal + Math.ceil(level.size / 2);
-  const twoStarLimit = threeStarLimit + Math.ceil(game.optimal * 0.3) + level.size;
+  const threeStarBonus = level.size <= 4 ? 5 : level.size === 5 ? 6 : level.size === 6 ? 8 : 10;
+  const threeStarLimit = game.optimal + threeStarBonus;
+  const twoStarLimit = game.optimal + Math.ceil(level.size / 2) + Math.ceil(game.optimal * 0.3) + level.size;
   const moveLimit = twoStarLimit + Math.ceil(game.optimal * 0.35) + level.size;
 
   useEffect(() => {
@@ -415,14 +416,12 @@ export default function Home() {
       .filter((index) => index >= 0);
     if (!wrong.length) return;
     const index = wrong[(moves + levelIndex) % wrong.length];
-    const nextMoves = moves + 1;
     setRotations((current) => {
       const next = current.map((rotation, tileIndex) => tileIndex === index ? rotation + shortestDeltaToSolution(game.masks[index], rotation) : rotation);
-      resolveMove(next, nextMoves);
+      resolveMove(next, moves);
       return next;
     });
     setHints((value) => value - 1);
-    setMoves(nextMoves);
     setStarted(true);
   };
 
